@@ -576,14 +576,14 @@ void ReplicatedBackend::submit_transaction(
 
   if (cct->_conf->osd_enable_pg_submitlock) {
     //aquire submitlock and release pg lock
-    parent->submit_lock();
-    parent->unlock();
+    ((PG*)parent)->submit_lock();
+    ((PG*)parent)->unlock();
   }
   parent->queue_transactions(tls, op.op);
   if (cct->_conf->osd_enable_pg_submitlock) {
     //aquire pg lock and release submitlock
-    parent->lock();
-    parent->submit_unlock();
+    ((PG*)parent)->lock();
+    ((PG*)parent)->submit_unlock();
   }
 }
 
