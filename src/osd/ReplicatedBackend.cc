@@ -574,7 +574,17 @@ void ReplicatedBackend::submit_transaction(
   vector<ObjectStore::Transaction> tls;
   tls.push_back(std::move(op_t));
 
+  if (cct->_conf->osd_enable_pg_submitlock) {
+    //aquire submitlock and release pg lock
+    parent->submit_lock();
+    parent->unlock();
+  }
   parent->queue_transactions(tls, op.op);
+  if (cct->_conf->osd_enable_pg_submitlock) {
+    //aquire pg lock and release submitlock
+    parent->lock();
+    parent->submit_unlock();
+  }
 }
 
 void ReplicatedBackend::op_applied(
