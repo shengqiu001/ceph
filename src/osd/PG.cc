@@ -286,6 +286,7 @@ PG::PG(OSDService *o, OSDMapRef curmap,
     p.shard),
   osdmap_ref(curmap), last_persisted_osdmap_ref(curmap), pool(_pool),
   _lock("PG::_lock"),
+  _submitlock("PG::_submitlock"),
   #ifdef PG_DEBUG_REFS
   _ref_id_lock("PG::_ref_id_lock"), _ref_id(0),
   #endif
@@ -366,6 +367,13 @@ void PG::lock(bool no_lockdep) const
   assert(!dirty_big_info);
 
   dout(30) << "lock" << dendl;
+}
+
+void PG::submit_lock(bool no_lockdep) const
+{
+  _submitlock.Lock(no_lockdep);
+
+  dout(30) << "submit_lock" << dendl;
 }
 
 std::string PG::gen_prefix() const

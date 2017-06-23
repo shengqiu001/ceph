@@ -9105,6 +9105,10 @@ void PrimaryLogPG::issue_repop(RepGather *repop, OpContext *ctx)
   for (auto &&entry: ctx->log) {
     projected_log.add(entry);
   }
+
+  //aquire submitlock and release pg lock
+  submit_lock();
+  unlock();
   pgbackend->submit_transaction(
     soid,
     ctx->delta_stats,
@@ -9120,6 +9124,9 @@ void PrimaryLogPG::issue_repop(RepGather *repop, OpContext *ctx)
     repop->rep_tid,
     ctx->reqid,
     ctx->op);
+  //aquire pg lock and release submitlock
+  lock();
+  submit_unlock();
 }
 
 PrimaryLogPG::RepGather *PrimaryLogPG::new_repop(

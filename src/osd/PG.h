@@ -299,6 +299,7 @@ protected:
    * unlock() when done with the current pointer (_most common_).
    */  
   mutable Mutex _lock;
+  mutable Mutex _submitlock;
   std::atomic_uint ref{0};
 
 #ifdef PG_DEBUG_REFS
@@ -326,6 +327,13 @@ public:
     return _lock.is_locked();
   }
 
+  void submit_lock(bool no_lockdep = false) const;
+  void submit_unlock() const {
+	_submitlock.Unlock();
+  }
+  bool is_submit_locked() const {
+    return _submitlock.is_locked();
+  }
 #ifdef PG_DEBUG_REFS
   uint64_t get_with_id();
   void put_with_id(uint64_t);
